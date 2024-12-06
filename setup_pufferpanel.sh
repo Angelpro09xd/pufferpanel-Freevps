@@ -12,7 +12,7 @@ docker create --name pufferpanel \
   -v pufferpanel-config:/etc/pufferpanel \
   -v /var/lib/pufferpanel:/var/lib/pufferpanel \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  --restart=on-failure \
+  --restart=always \
   pufferpanel/pufferpanel:latest
 
 # Start the PufferPanel container
