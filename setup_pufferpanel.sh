@@ -62,8 +62,6 @@ echo -e "${GREEN}Installation completed. You can access PufferPanel using:${NC}"
 echo -e "${GREEN}http://localhost:8080${NC} (if you are on the same machine)"
 echo -e "${GREEN}http://<your-IP>:8080${NC} (from another machine on the network)"
 
-# Final information
-echo -e "${YELLOW}If you need to manage users, use the following commands:${NC}"
-echo -e "${GREEN}To create an admin user:${NC}"
-echo -e "${GREEN}docker exec -it pufferpanel pufferpanel user create <email> <password> --admin${NC}"
+# Creating User
+docker exec -it pufferpanel /pufferpanel/pufferpanel user add
 
