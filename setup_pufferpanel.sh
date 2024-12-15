@@ -1,30 +1,30 @@
 #!/bin/bash
 
-# Colores para mensajes
+# Colors for messages
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}Iniciando configuración completa de PufferPanel...${NC}"
+echo -e "${GREEN}Starting full configuration of PufferPanel...${NC}"
 
-# 1. Verificar si Docker está instalado
+# 1. Check if Docker is installed
 if ! command -v docker &> /dev/null; then
-  echo -e "${YELLOW}Docker no está instalado. Instalando Docker...${NC}"
+  echo -e "${YELLOW}Docker is not installed. Installing Docker...${NC}"
   curl -fsSL https://get.docker.com -o get-docker.sh
   sh get-docker.sh
   rm get-docker.sh
 else
-  echo -e "${GREEN}Docker ya está instalado.${NC}"
+  echo -e "${GREEN}Docker is already installed.${NC}"
 fi
 
-# 2. Crear volúmenes persistentes para configuración y datos
-echo -e "${YELLOW}Creando volúmenes para PufferPanel...${NC}"
+# 2. Create persistent volumes for configuration and data
+echo -e "${YELLOW}Creating volumes for PufferPanel...${NC}"
 docker volume create pufferpanel-config
 docker volume create pufferpanel-data
 
-# 3. Descargar e iniciar el contenedor de PufferPanel
-echo -e "${YELLOW}Iniciando el contenedor de PufferPanel...${NC}"
+# 3. Download and start the PufferPanel container
+echo -e "${YELLOW}Starting the PufferPanel container...${NC}"
 docker run -d --name pufferpanel \
   -p 8080:8080 \
   -p 5657:5657 \
@@ -33,37 +33,37 @@ docker run -d --name pufferpanel \
   --restart=on-failure \
   pufferpanel/pufferpanel:latest
 
-# 4. Esperar unos segundos para que el contenedor arranque
-echo -e "${YELLOW}Esperando a que PufferPanel se inicialice...${NC}"
+# 4. Wait a few seconds for the container to start
+echo -e "${YELLOW}Waiting for PufferPanel to initialize...${NC}"
 sleep 10
 
-# 5. Verificar la existencia de config.json
+# 5. Check for the existence of config.json
 CONFIG_PATH="/workspace/.docker-root/volumes/pufferpanel-config/_data"
 if [ ! -f "$CONFIG_PATH/config.json" ]; then
-  echo -e "${YELLOW}Creando archivo config.json...${NC}"
-  docker exec -it pufferpanel pufferpanel configure # Genera el archivo inicial en el contenedor
+  echo -e "${YELLOW}Creating config.json file...${NC}"
+  docker exec -it pufferpanel pufferpanel configure # Generates the initial file in the container
   docker cp pufferpanel:/etc/pufferpanel/config.json "$CONFIG_PATH/config.json"
 else
-  echo -e "${GREEN}El archivo config.json ya existe.${NC}"
+  echo -e "${GREEN}The config.json file already exists.${NC}"
 fi
 
-# 6. Asegurar que el archivo config.json esté correctamente ubicado
-echo -e "${YELLOW}Estableciendo permisos correctos para config.json...${NC}"
+# 6. Ensure the config.json file is correctly placed
+echo -e "${YELLOW}Setting correct permissions for config.json...${NC}"
 docker exec -it pufferpanel chmod 600 /etc/pufferpanel/config.json
 docker exec -it pufferpanel chown -R 1000:1000 /etc/pufferpanel
-echo -e "${GREEN}Permisos establecidos.${NC}"
+echo -e "${GREEN}Permissions set.${NC}"
 
-# 7. Reiniciar el contenedor para aplicar configuraciones
-echo -e "${YELLOW}Reiniciando PufferPanel para aplicar configuraciones...${NC}"
+# 7. Restart the container to apply configurations
+echo -e "${YELLOW}Restarting PufferPanel to apply configurations...${NC}"
 docker restart pufferpanel
 
-# 8. Mostrar información de acceso
-echo -e "${GREEN}Instalación completada. Puedes acceder a PufferPanel usando:${NC}"
-echo -e "${GREEN}http://localhost:8080${NC} (si estás en la misma máquina)"
-echo -e "${GREEN}http://<tu-IP>:8080${NC} (desde otra máquina en la red)"
+# 8. Display access information
+echo -e "${GREEN}Installation completed. You can access PufferPanel using:${NC}"
+echo -e "${GREEN}http://localhost:8080${NC} (if you are on the same machine)"
+echo -e "${GREEN}http://<your-IP>:8080${NC} (from another machine on the network)"
 
-# Información final
-echo -e "${YELLOW}Si necesitas administrar usuarios, utiliza los siguientes comandos:${NC}"
-echo -e "${GREEN}Para crear un usuario administrador:${NC}"
-echo -e "${GREEN}docker exec -it pufferpanel pufferpanel user create <email> <contraseña> --admin${NC}"
+# Final information
+echo -e "${YELLOW}If you need to manage users, use the following commands:${NC}"
+echo -e "${GREEN}To create an admin user:${NC}"
+echo -e "${GREEN}docker exec -it pufferpanel pufferpanel user create <email> <password> --admin${NC}"
 
